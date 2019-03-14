@@ -1,0 +1,232 @@
+<html>
+<head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+<body onload="insertOrUpdate()">
+    <div class="container">
+     
+    
+<a class="btn btn-success btn-md" href="index.html"><i class="glyphicon glyphicon-list-alt"></i>Go to List</a>
+      <b><span  style="padding-left:35%;font-size: 30px;color: lightcoral">ADD NEW</span></b>
+      <div class="jumbotron">
+        <form id="quesInputForm" autocomplete="off">
+          <div class="form-group">
+            <label for="quesTitleInput">Title</label>
+            <input type="text" class="form-control" id="quesTitleInput" placeholder="Enter  the Title of Question ..." required>
+          </div>
+          <div class="form-group">
+            <label for="quesTypeInput">TYPE</label>
+            <select id="quesTypeInput" class="form-control">
+              <option value="Mcq" selected>Multiple Choice Question</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="quesDescInput">Description</label>
+            <textarea rows="4" cols="50" id="quesDescInput" class="form-control" placeholder="Enter Question here..." required></textarea>
+              
+          </div>
+           <div class="form-group">
+<ol id="op" type="A"><li value="1">
+<input type="text" class="form-control" placeholder="Enter option A" required>
+<input type="radio" name="op" value="A" onclick="getOption(this.value)" required>
+</li><li value="2">
+<input type="text" class="form-control" placeholder="Enter option B" required>
+<input type="radio" name="op" value="B" onclick="getOption(this.value)" >
+</li><li value="3">
+<input type="text" class="form-control" placeholder="Enter option C" required>
+<input type="radio"value="C" name="op" onclick="getOption(this.value)" > 
+</li><li value="4">
+<input type="text" class="form-control" placeholder="Enter option D" required>
+<input type="radio" name="op" value="D"onclick="getOption(this.value)" > 
+</li></ol>
+<a href="#" title="add options" onclick="addOption()" class="btn-lg-lg">
+    <h3 class="glyphicon glyphicon-plus-sign"></h3>
+  </a>
+
+            </div>
+          
+          <button type="submit" id="sub" onclick="save()" class="btn btn-primary">Save</button>
+          <button type="hidden" style="display:none;" id="hiddenButton"></button>
+        </form>
+      </div>
+
+
+
+
+
+      <script>
+         var a;
+          function getOption(option)
+          {
+
+        a=option;
+          }
+          function returnOption()
+          {
+              return a;
+          }
+
+function addOption()
+{
+    
+var ol=document.getElementById("op");
+ var val=ol.lastChild.value;
+val++;
+li = document.createElement("li");
+li.setAttribute("value",val);
+
+li.innerHTML=" "+
+"<input type='text' class='form-control' placeholder='Enter option "+String.fromCharCode(val+64)  + "'required>"+" "+
+  "<input type='radio' name='op' value='" +String.fromCharCode(val+64)+ "'onclick='getOption(this.value)'>" //to make ascii code
+
+ol.appendChild(li);
+
+}
+</script>
+
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+     <script>
+   function IDGenerator() {
+	 
+   this.length = 8;
+   this.timestamp = +new Date;
+   
+   var _getRandomInt = function( min, max ) {
+    return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
+   }
+   
+   this.generate = function() {
+     var ts = this.timestamp.toString();
+     var parts = ts.split( "" ).reverse();
+     var id = "";
+     
+     for( var i = 0; i < this.length; ++i ) {
+      var index = _getRandomInt( 0, parts.length - 1 );
+      id += parts[index];	 
+     }
+     
+     return id;
+   }
+  }
+   
+    function save() {
+       
+        var  quesId  = document.getElementById('hiddenButton').innerHTML;
+        var quesDesc = document.getElementById('quesDescInput').value.trim();
+        var quesTitle = document.getElementById('quesTitleInput').value.trim();
+        
+        var quesOption = returnOption();
+       
+        
+        op=document.getElementById("op");
+        
+        var arrOptions=[];
+        var val;
+       for(j=0;j<op.childNodes.length;j++)
+       {
+         val=op.childNodes[j].childNodes[1].value.trim();
+        if(!val)
+        break;
+            arrOptions.push(val);
+
+       }
+      if(quesDesc && quesTitle && quesOption && val)
+      {
+       
+        var quesObject = {
+          
+          description: quesDesc,
+        options:arrOptions,
+          title:quesTitle,
+          option:quesOption
+        }
+      
+        if(localStorage.getItem('ques'))
+        {
+          var i = JSON.parse(localStorage.getItem('ques'));
+          if(quesId)
+           {
+            for(var k=0;k<i.length;k++)
+           {
+             if(i[k].uid==quesId)
+               {
+                 Object.assign(i[k],quesObject);
+
+                }
+            }
+           }
+           else
+           {
+            var generator = new IDGenerator();
+			var id=generator.generate();
+          i.push(Object.assign(quesObject,{uid:id}));
+           }
+          localStorage.setItem('ques', JSON.stringify(i));
+        }
+        else
+        if (localStorage.getItem('ques') == null) 
+        {
+          var generator = new IDGenerator();
+			var id=generator.generate();
+          var q = [];
+          q.push(Object.assign(quesObject,{uid:id}));
+          localStorage.setItem('ques', JSON.stringify(q));
+        } 
+        
+      }
+      }
+      
+
+function insertOrUpdate()
+{
+  var qs=new URLSearchParams(window.location.search);
+     if(qs.has('id'))
+     {
+       qid=qs.get('id');
+
+       var arr=JSON.parse(localStorage.getItem('ques'));
+    for(var i=0;i<arr.length;i++)
+     {
+          if(arr[i].uid==qid)
+           {
+
+           
+            document.getElementById('quesDescInput').value=arr[i].description;
+            document.getElementById('quesTitleInput').value=arr[i].title;
+            op=document.getElementById("op");
+            for(j=0;j<arr[i].options.length;j++)
+             {
+               if(op.childNodes.length<=j)
+               addOption();
+         op.childNodes[j].childNodes[1].value=arr[i].options[j];
+         if(op.childNodes[j].childNodes[3].value==arr[i].option)
+            {
+          op.childNodes[j].childNodes[3].checked=true;
+            }
+              }
+           
+
+              document.getElementById('hiddenButton').innerHTML=arr[i].uid;
+              document.getElementById('sub').innerHTML="Update";
+              break;
+          }
+
+
+     }
+
+    }
+  }
+
+
+
+</script>
+
+      </body>
+      </html>
